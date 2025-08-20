@@ -11,6 +11,7 @@ import net.runelite.client.plugins.microbot.util.misc.Rs2Food;
 @ConfigGroup("Thieving")
 @ConfigInformation(
         "Thieving plugin.<br/>" +
+                "Edited by Cardew<br/>" +
         "<b>NOTES:</b><br/>" +
         "- If the npc is not in the list, select “None” and mark the npc with RL “Npc Indicators” plugin.<br/><br/>" +
         "- The plugin takes the player's starting position, not the npc's. Get close to the npc to steal before starting the plugin.<br/><br/>" +

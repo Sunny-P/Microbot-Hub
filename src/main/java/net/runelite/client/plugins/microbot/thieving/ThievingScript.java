@@ -31,6 +31,7 @@ import net.runelite.client.plugins.microbot.util.security.Login;
 import net.runelite.client.plugins.microbot.util.walker.Rs2Walker;
 import net.runelite.client.plugins.microbot.util.walker.WalkerState;
 import net.runelite.client.plugins.skillcalculator.skills.MagicAction;
+import net.runelite.http.api.worlds.WorldRegion;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -131,6 +132,21 @@ public class ThievingScript extends Script {
                 .filter(getThievingNpcFilter())
                 .filter(n -> !isNpcNull(n))
                 .min(Comparator.comparingInt(Rs2NpcModel::getDistanceFromPlayer)).orElse(null);
+        if (config.THIEVING_NPC() == ThievingNpc.WEALTHY_CITIZEN)
+        {
+            // If we fail to get a wealthy citizen that's interacting. See if we can get a regular one.
+            if (npc == null)
+            {
+                Rs2NpcModel newNpc = Rs2NpcCache.getAllNpcs()
+                        .filter(validateName("Wealthy citizen"::equalsIgnoreCase))
+                        .filter(n -> !isNpcNull(n))
+                        .min(Comparator.comparingInt(Rs2NpcModel::getDistanceFromPlayer)).orElse(null);
+
+                if (newNpc == null) return null;
+                log.info("Found new NPC={} to thieve @ {}", newNpc.getName(), toString(newNpc.getWorldLocation()));
+                return newNpc;
+            }
+        }
         if (npc == null) return null;
         log.info("Found new NPC={} to thieve @ {}", npc.getName(), toString(npc.getWorldLocation()));
         return npc;
@@ -420,6 +436,7 @@ public class ThievingScript extends Script {
                 }
                 return;
             case PICKPOCKET:
+                if (Rs2Player.isStunned()) return;
                 if (Rs2Inventory.hasItem(ThievingData.ROGUE_SET.toArray(String[]::new)) && !isWearing(ThievingData.ROGUE_SET)) {
                     // only equip if we are safely in the house w/ the npc
                     if (config.THIEVING_NPC() != ThievingNpc.VYRES ||
@@ -453,18 +470,18 @@ public class ThievingScript extends Script {
 
                 var highlighted = net.runelite.client.plugins.npchighlight.NpcIndicatorsPlugin.getHighlightedNpcs();
                 if (highlighted.isEmpty()) {
+                    //if (isNpcNull(thievingNpc)) return;
+                    //if (!Rs2Npc.pickpocket(thievingNpc)) {
+                    thievingNpc = getThievingNpc();
                     if (isNpcNull(thievingNpc)) return;
                     if (!Rs2Npc.pickpocket(thievingNpc)) {
-                        thievingNpc = getThievingNpc();
-                        if (isNpcNull(thievingNpc)) return;
-                        if (!Rs2Npc.pickpocket(thievingNpc)) {
-                            // NPC Cache force refresh or something should work here as well
-                            // it seems sometimes the data in it become stale
-                            log.warn("NPC seems bugged hopping world");
-                            hopWorld();
-                            return;
-                        }
+                        // NPC Cache force refresh or something should work here as well
+                        // it seems sometimes the data in it become stale
+                        log.warn("NPC seems bugged hopping world");
+                        hopWorld();
+                        return;
                     }
+                    //}
                 } else {
                     Rs2Npc.pickpocket(highlighted);
                 }
@@ -878,7 +895,7 @@ public class ThievingScript extends Script {
 
         log.info("Hopping world, please wait...");
         for (int attempt = 0; attempt < maxAttempts; attempt++) {
-            int world = Login.getRandomWorld(true, null);
+            int world = Login.getRandomWorld(true, WorldRegion.AUSTRALIA);
             Microbot.hopToWorld(world);
             final AtomicBoolean interrupt = new AtomicBoolean(false);
             boolean hopSuccess = sleepUntil(() -> {
