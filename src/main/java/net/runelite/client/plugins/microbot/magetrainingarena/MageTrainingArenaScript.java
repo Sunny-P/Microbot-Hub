@@ -10,6 +10,8 @@ import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
 import net.runelite.client.plugins.microbot.globval.enums.InterfaceTab;
 import net.runelite.client.plugins.microbot.magetrainingarena.enums.*;
+import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
+import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
 import net.runelite.client.plugins.microbot.util.camera.Rs2Camera;
 import net.runelite.client.plugins.microbot.util.dialogues.Rs2Dialogue;
@@ -22,6 +24,7 @@ import net.runelite.client.plugins.microbot.util.inventory.Rs2RunePouch;
 import net.runelite.client.plugins.microbot.util.keyboard.Rs2Keyboard;
 import net.runelite.client.plugins.microbot.util.magic.*;
 import net.runelite.client.plugins.microbot.util.math.Rs2Random;
+import net.runelite.client.plugins.microbot.util.models.RS2Item;
 import net.runelite.client.plugins.microbot.util.npc.Rs2Npc;
 import net.runelite.client.plugins.microbot.util.npc.Rs2NpcModel;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
@@ -65,6 +68,10 @@ public class MageTrainingArenaScript extends Script {
     @Getter
     private static int buyable;
 
+    float deltaTime;    // deltaTime is the time difference between each call. It can be used to relatively accurately track time on a scale of seconds.
+    float timeSinceLastMicrobreakOffer = 0.0f;
+    int microbreakCheckDelay = 90; // Probability of roughly 1 microbreak every 30 minutes (Assuming a 5% chance of going on a microbreak). This checks once every 90 seconds.
+
     public boolean run(MageTrainingArenaConfig config) {
         this.config = config;
         Microbot.log(String.format("repeatRoom: %s", config.repeatRoom()));
@@ -72,16 +79,51 @@ public class MageTrainingArenaScript extends Script {
         bought = 0;
         buyable = 0;
         Rs2Walker.disableTeleports = true;
+
+        Rs2Antiban.resetAntibanSettings();
+
+        Rs2AntibanSettings.antibanEnabled = true;
+        Rs2AntibanSettings.usePlayStyle = true;
+        Rs2AntibanSettings.profileSwitching = true;
+        Rs2AntibanSettings.randomIntervals = false;
+        Rs2AntibanSettings.simulateFatigue = true;
+        Rs2AntibanSettings.simulateAttentionSpan = true;
+        Rs2AntibanSettings.behavioralVariability = true;
+        Rs2AntibanSettings.nonLinearIntervals = true;
+        Rs2AntibanSettings.dynamicIntensity = true;
+        Rs2AntibanSettings.dynamicActivity = true;
+        Rs2AntibanSettings.naturalMouse = true;
+        Rs2AntibanSettings.simulateMistakes = true;
+        Rs2AntibanSettings.moveMouseOffScreen = true;
+        Rs2AntibanSettings.moveMouseRandomly = true;
+        Rs2AntibanSettings.moveMouseRandomlyChance = 0.1;
+        Rs2AntibanSettings.takeMicroBreaks = true;
+        Rs2AntibanSettings.microBreakDurationLow = 2;
+        Rs2AntibanSettings.microBreakDurationHigh = 7;
+        Rs2AntibanSettings.microBreakChance = 0.05;
+        Rs2AntibanSettings.contextualVariability = true;
+        Rs2AntibanSettings.actionCooldownChance = 0.0;
+
         mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
                 if (!Microbot.isLoggedIn()) return;
                 if (!super.run()) return;
+                if (Rs2AntibanSettings.microBreakActive) return;
                 if (mtaPlugin != null && !Microbot.getPluginManager().isActive(mtaPlugin)) return;
+                long startTime = System.currentTimeMillis();
 
                 if (!Rs2Magic.isSpellbook(Rs2Spellbook.MODERN)) {
                     Microbot.log("Wrong spellbook found...please use the modern spellbook for this script.");
                     sleep(5000);
                     return;
+                }
+
+                // IS OUR SPELL FILTERING OPEN FOR SOME ACCIDENTAL REASON
+                // This may open if an interaction happens over the spellbook interface, clicking the filter button inadvertently while completing the action.
+                if (Rs2Widget.isWidgetVisible(218, 196))
+                {
+                    // Click the spell filter button
+                    Rs2Widget.clickWidget(218, 202);
                 }
 
                 if (mtaPlugin == null) {
@@ -181,6 +223,17 @@ public class MageTrainingArenaScript extends Script {
                         break;
                 }
             }
+                long endTime = System.currentTimeMillis();
+                long totalTime = endTime - startTime;
+
+                deltaTime = (float) (totalTime * 0.001);
+                timeSinceLastMicrobreakOffer += deltaTime;
+
+                if (timeSinceLastMicrobreakOffer >= microbreakCheckDelay)
+                {
+                    Rs2Antiban.takeMicroBreakByChance();
+                    timeSinceLastMicrobreakOffer = 0;
+                }
 
                 sleepGaussian(600, 150);
             } catch (Exception ex) {
@@ -304,10 +357,33 @@ public class MageTrainingArenaScript extends Script {
             return;
         }
 
-        boolean successFullLoot = Rs2GroundItem.loot(ItemID.MAGICTRAINING_DRAGONSTONE, 12) && Rs2Inventory.waitForInventoryChanges(5000);
+        if (Rs2GroundItem.exists(ItemID.MAGICTRAINING_DRAGONSTONE, 50)) {
+            boolean successFullLoot = Rs2Inventory.waitForInventoryChanges(() -> {
+                RS2Item[] items = Rs2GroundItem.getAll(50);
+                for (RS2Item item : items)
+                {
+                    if (item.getItem().getId() == ItemID.MAGICTRAINING_DRAGONSTONE)
+                    {
+                        if (!Rs2Camera.isTileOnScreen(item.getTile().getLocalLocation()))
+                        {
+                            Rs2Camera.turnTo(item.getTile().getLocalLocation());
+                        }
+                        Rs2GroundItem.loot(ItemID.MAGICTRAINING_DRAGONSTONE);
+                        break;
+                    }
+                }
+                //Rs2GroundItem.loot(ItemID.DRAGONSTONE_6903);
+                Rs2Player.waitForWalking();
+            });
 
-        if (successFullLoot && Rs2Inventory.emptySlotCount() > 0)
-            return;
+            if (successFullLoot && Rs2Inventory.emptySlotCount() > 0)
+                return;
+        }
+
+        //boolean successFullLoot = Rs2GroundItem.loot(ItemID.MAGICTRAINING_DRAGONSTONE, 12) && Rs2Inventory.waitForInventoryChanges(5000);
+
+        //if (successFullLoot && Rs2Inventory.emptySlotCount() > 0)
+        //    return;
 
         var bonusShape = getBonusShape();
         if (bonusShape == null) return;
@@ -584,6 +660,16 @@ public class MageTrainingArenaScript extends Script {
 
         if (room == null)
             return;
+
+        if (room == Rooms.ALCHEMIST)
+        {
+            // Check if we have coins from alching in Alchemist room
+            if (Rs2Inventory.contains(ItemID.MAGICTRAINING_COINS))
+            {
+                Rs2GameObject.interact(ObjectID.MAGICTRAINING_COIN_COLLECTOR, "Deposit");
+                Rs2Player.waitForWalking();
+            }
+        }
 
         WorldPoint exit = null;
         if (room != Rooms.TELEKINETIC)
