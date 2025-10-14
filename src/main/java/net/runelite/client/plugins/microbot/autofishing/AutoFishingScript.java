@@ -87,6 +87,7 @@ public class AutoFishingScript extends Script {
 
     private AutoFishingState determineState() {
         if (Rs2Inventory.isFull()) {
+            if (selectedFish == Fish.KARAMBWANJI) return AutoFishingState.FISHING;
             if (isSpecialFish(selectedFish)) return AutoFishingState.PROCESSING_FISH;
             if (config.cookFish() && !getRawFishInInventory().isEmpty()) return AutoFishingState.COOKING;
             if (config.useBank()) return AutoFishingState.DEPOSITING;
