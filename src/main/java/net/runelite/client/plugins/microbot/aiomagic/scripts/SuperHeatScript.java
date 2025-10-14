@@ -3,9 +3,9 @@ package net.runelite.client.plugins.microbot.aiomagic.scripts;
 import net.runelite.api.Skill;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
-import net.runelite.client.plugins.microbot.magic.aiomagic.AIOMagicPlugin;
-import net.runelite.client.plugins.microbot.magic.aiomagic.enums.MagicState;
-import net.runelite.client.plugins.microbot.magic.aiomagic.enums.SuperHeatItem;
+import net.runelite.client.plugins.microbot.aiomagic.AIOMagicPlugin;
+import net.runelite.client.plugins.microbot.aiomagic.enums.MagicState;
+import net.runelite.client.plugins.microbot.aiomagic.enums.SuperHeatItem;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.microbot.util.antiban.enums.Activity;
@@ -66,7 +66,7 @@ public class SuperHeatScript extends Script {
 
                 switch (state) {
                     case BANKING:
-                        boolean isBankOpen = Rs2Bank.isNearBank(15) ? Rs2Bank.useBank() : Rs2Bank.walkToBankAndUseBank();
+                        boolean isBankOpen = Rs2Bank.isNearBank(15) ? Rs2Bank.openBank() : Rs2Bank.walkToBankAndUseBank();
                         if (!isBankOpen || !Rs2Bank.isOpen()) return;
 
                         Rs2Bank.depositAllExcept(ItemID.NATURERUNE);

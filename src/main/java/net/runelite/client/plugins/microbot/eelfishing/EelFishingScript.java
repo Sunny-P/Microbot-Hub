@@ -5,8 +5,8 @@ import net.runelite.api.gameval.ItemID;
 import net.runelite.client.game.FishingSpot;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
-import net.runelite.client.plugins.microbot.fishing.eel.EelFishingConfig;
-import net.runelite.client.plugins.microbot.fishing.eel.enums.EelFishingSpot;
+import net.runelite.client.plugins.microbot.eelfishing.EelFishingConfig;
+import net.runelite.client.plugins.microbot.eelfishing.enums.EelFishingSpot;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.microbot.util.antiban.enums.ActivityIntensity;
@@ -14,6 +14,7 @@ import net.runelite.client.plugins.microbot.util.camera.Rs2Camera;
 import net.runelite.client.plugins.microbot.util.equipment.Rs2Equipment;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
 import net.runelite.client.plugins.microbot.util.npc.Rs2Npc;
+import net.runelite.client.plugins.microbot.util.npc.Rs2NpcModel;
 
 import java.util.concurrent.TimeUnit;
 
@@ -53,7 +54,7 @@ public class EelFishingScript extends Script {
                 return;
             }
 
-            var fishingspot = findFishingSpot();
+            Rs2NpcModel fishingspot = findFishingSpot();
             if (fishingspot == null) {
                 return;
             }
@@ -76,9 +77,9 @@ public class EelFishingScript extends Script {
 
     }
 
-    private NPC findFishingSpot() {
+    private Rs2NpcModel findFishingSpot() {
         for (int fishingSpotId : getFishingSpotIds(config.fishingSpot())) {
-            NPC fishingspot = Rs2Npc.getNpc(fishingSpotId);
+            Rs2NpcModel fishingspot = Rs2Npc.getNpc(fishingSpotId);
             if (fishingspot != null) {
                 return fishingspot;
             }

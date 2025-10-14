@@ -5,7 +5,7 @@ import net.runelite.api.gameval.ItemID;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
 import net.runelite.client.plugins.microbot.aiomagic.AIOMagicPlugin;
-import net.runelite.client.plugins.microbot.magic.aiomagic.enums.MagicState;
+import net.runelite.client.plugins.microbot.aiomagic.enums.MagicState;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.microbot.util.antiban.enums.Activity;
@@ -60,7 +60,7 @@ public class SpinFlaxScript extends Script {
                 switch (state) {
                     case BANKING:
                         Microbot.status = "Banking: prepare 25 flax";
-                        boolean isBankOpen = Rs2Bank.isNearBank(15) ? Rs2Bank.useBank() : Rs2Bank.walkToBankAndUseBank();
+                        boolean isBankOpen = Rs2Bank.isNearBank(15) ? Rs2Bank.openBank() : Rs2Bank.walkToBankAndUseBank();
                         if (!isBankOpen || !Rs2Bank.isOpen()) return;
 
                         Rs2Bank.depositAll(ItemID.BOW_STRING);

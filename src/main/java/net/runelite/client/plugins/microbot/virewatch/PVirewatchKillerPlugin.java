@@ -18,7 +18,6 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.PluginConstants;
-import net.runelite.client.plugins.microbot.herbrun.HerbrunPlugin;
 import net.runelite.client.plugins.microbot.util.combat.Rs2Combat;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2ItemModel;
@@ -48,7 +47,7 @@ import java.util.stream.Collectors;
 )
 public class PVirewatchKillerPlugin extends Plugin {
 
-    public final static String version = "1.0.0";
+    public final static String version = "1.0.1";
 
     private PLooter looterScript = new PLooter();
     private PAlcher alchScript = new PAlcher();

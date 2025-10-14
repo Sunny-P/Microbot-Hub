@@ -7,12 +7,9 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.PluginConstants;
-import net.runelite.client.plugins.microbot.driftnet.DriftNetPlugin;
 
 import javax.inject.Inject;
 import java.awt.*;
-
-import static net.runelite.client.plugins.PluginDescriptor.Mocrosoft;
 
 @PluginDescriptor(
         name = PluginDescriptor.Default + "Event Dismiss",
@@ -28,7 +25,7 @@ import static net.runelite.client.plugins.PluginDescriptor.Mocrosoft;
 )
 @Slf4j
 public class EventDismissPlugin extends Plugin {
-    public static final String version = "1.0.1";
+    public static final String version = "1.0.4";
     @Inject
     private ConfigManager configManager;
     @Inject
