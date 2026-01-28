@@ -4,20 +4,28 @@ import com.google.inject.Provides;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.events.ChatMessage;
+import net.runelite.api.events.NpcSpawned;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.PluginConstants;
+import net.runelite.client.plugins.microbot.api.npc.Rs2NpcQueryable;
+import net.runelite.client.plugins.microbot.util.camera.Rs2Camera;
+import net.runelite.client.plugins.microbot.util.npc.Rs2NpcModel;
+import net.runelite.client.plugins.microbot.util.walker.Rs2Walker;
 import net.runelite.client.plugins.pestcontrol.Portal;
 import net.runelite.client.ui.overlay.OverlayManager;
 
 import javax.inject.Inject;
 import java.awt.*;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static net.runelite.client.plugins.microbot.pestcontrol.PestControlScript.portals;
+import static net.runelite.client.plugins.microbot.util.Global.sleepGaussian;
 
 @PluginDescriptor(
         name = PluginConstants.MOCROSOFT + "Pest Control",
@@ -34,7 +42,7 @@ import static net.runelite.client.plugins.microbot.pestcontrol.PestControlScript
 @Slf4j
 public class PestControlPlugin extends Plugin {
 
-	static final String version = "2.2.8";
+	static final String version = "2.2.8C";
 
     @Inject
     PestControlScript pestControlScript;
@@ -91,4 +99,42 @@ public class PestControlPlugin extends Plugin {
             }
         }
     }
+
+    // Yellow Portal No Shield ID:  1741
+    // Purple Portal No Shield ID:  1739
+    // Blue Portal No Shield ID:    1740
+    // Red Portal No Shield ID:     1742
+    //int[] portalIDs = {1739, 1740, 1741, 1742};
+    //@Subscribe
+    //public void onNpcSpawned(NpcSpawned npcSpawned)
+    //{
+    //    if (npcSpawned == null) return;
+    //    if (!pestControlScript.isInPestControl()) return;
+//
+    //    int id = npcSpawned.getNpc().getId();
+    //    switch(id)
+    //    {
+    //        case 1739:
+    //        case 1740:
+    //        case 1741:
+    //        case 1742:
+    //            // Stop walker from completing its path, and try and attack the portal faster
+    //            Rs2Walker.setTarget(null);
+//
+    //            // npcSpawned matches a portal ID, so a portal has "spawned".
+    //            //if (!Rs2Camera.isTileOnScreen(npcSpawned.getNpc().getLocalLocation()))
+    //            //{
+    //            Rs2Camera.turnTo(npcSpawned.getNpc().getLocalLocation());
+    //            sleepGaussian(600, 100);
+    //            //}
+//
+    //            Rs2NpcQueryable npcQueryable = Microbot.getRs2NpcCache().query().fromWorldView().withId(id);
+    //            if (npcQueryable == null) return;
+    //            npcQueryable.interact("Attack");
+    //            break;
+//
+    //        default:
+    //            return;
+    //    }
+    //}
 }

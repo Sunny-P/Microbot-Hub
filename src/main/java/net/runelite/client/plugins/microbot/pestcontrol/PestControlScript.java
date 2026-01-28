@@ -1,10 +1,7 @@
 package net.runelite.client.plugins.microbot.pestcontrol;
 
 import com.google.common.collect.ImmutableSet;
-import net.runelite.api.NPCComposition;
-import net.runelite.api.NpcID;
-import net.runelite.api.ObjectID;
-import net.runelite.api.Skill;
+import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.widgets.ComponentID;
 import net.runelite.api.widgets.Widget;
@@ -13,6 +10,7 @@ import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
 import net.runelite.client.plugins.microbot.util.Rs2InventorySetup;
 import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
+import net.runelite.client.plugins.microbot.util.camera.Rs2Camera;
 import net.runelite.client.plugins.microbot.util.combat.Rs2Combat;
 import net.runelite.client.plugins.microbot.util.gameobject.Rs2GameObject;
 import net.runelite.client.plugins.microbot.util.magic.Rs2Magic;
@@ -111,7 +109,8 @@ public class PestControlScript extends Script {
                         final Widget prayerOrb = Rs2Widget.getWidget(ComponentID.MINIMAP_QUICK_PRAYER_ORB);
                         if (prayerOrb != null) {
                             Microbot.getMouse().click(prayerOrb.getCanvasLocation());
-                            sleep(1000, 1500);
+                            //sleep(1000, 1500);
+                            //sleepGaussian(600, 200);
                         }
                     }
                     if (!walkToCenter) {
@@ -195,7 +194,7 @@ public class PestControlScript extends Script {
                 ex.printStackTrace();
                 Microbot.log(ex.getMessage());
             }
-        }, 0, 300, TimeUnit.MILLISECONDS);
+        }, 0, 100, TimeUnit.MILLISECONDS);
         return true;
     }
 
